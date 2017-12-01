@@ -234,12 +234,12 @@ getBlog(callback: processInetResource)
 getBlog(callback: processVideoBlog) // Cannot convert value of type '(VideoBlog) -> ()' to expected argument type '(Blog) -> ()'
 ```
 
-In this example, Swift functions behave as contrvarian with their components, cause:
+In this example, Swift functions behave as contravariant with their components, cause:
 
 * `Blog` is a subtype of `InetResource`  and `(InetResource) -> ()` is a subtype of `(Blog) -> ()`(as derived from `getBlog(callback: processInetResource)`)
 * `VideoBlog` is a subtype of `Blog` and `(VideoBlog) -> ()`isn’t a subtype of `(Blog) -> ()`(as derived from `getBlog(callback: processVideoBlog)`)
 
-But the real truth is that ***functions in Swift are contravariant with their arguments types and covariant with their return type***. For analogy with our abstract syntax, the function of type `(P1, P2) -> R` looks like `F[P1, P2][R]` and is contravariant with the first components group and covariant with the second.
+Looks like functions in Swift are contravariant with their arguments types and covariant with their return type, but this is also not completely true (we are going to see that a little bit later).
 
 At first look, it seems confusing, that functions are contravariant with their arguments types, but it really makes sense. Assume that passing into the function `getBlog(callback:)` an argument of the type `(VideoBlog) -> ()` works. Then, during the function execution, it will try to call that  `callback` parameter with an argument of the type `Blog`. But a substitution of `VideoBlog` type with `Blog` type is impossible, cause `Blog` isn’t a subtype of `VideoBlog`. With passing in an argument of the type `(InetResource) -> ()`, a substitution of`InetResource` type with `Blog` type takes place, what is completely legally, cause `Blog` is a subtype of `InetResource`.
 
@@ -267,12 +267,70 @@ getBlog(callback: processPossibleBlog)
 
 Here we substitute the function, which receives an argument of the non-optional type `(Blog)->()`, with the function, which receives an argument of the optional type `(Blog?)->()`. It makes sense, cause then the second can easily be called with a non-optional argument inside the outer function `getBlog(callback:)`.
 
-In general, we should think about this in a next way:
+And now, the last but not the least about variance of functions:
 
-* ***arguments types of a 'replace function' will be substituted with argument types of a 'replaced function'***;
-* ***a return type of a 'replace function' will substitute a return type of a 'replaced function'***.
+[](VarianceOfFunctionsInoutArgumentsTypes.playground)
 
-Here are: 'replace function' —  a function that substitutes another one; 'replaced function' —  a function that is substituted by another one.
+```swift
+class InetResource {}
+class Blog: InetResource {}
+class VideoBlog: Blog {}
+
+var blog: Blog = Blog()
+
+// Function with argument of type '(inout Blog)->()'
+func applyAdsMembershipForBlog(_ itegrateAds:(inout Blog)->()) {
+    itegrateAds(&blog)
+}
+
+// Function of type '(inout InetResource) -> ()'
+func integrateAdsForInetResource(_ inetResource: inout InetResource) {}
+
+// Function of type '(inout VideoBlog) -> ()'
+func integrateAdsForVideoBlog(_ videoBlog: inout VideoBlog) {}
+
+applyAdsMembershipForBlog(integrateAdsForInetResource) // Cannot convert value of type '(inout InetResource) -> ()' to expected argument type '(inout Blog) -> ()'
+applyAdsMembershipForBlog(integrateAdsForVideoBlog) // Cannot convert value of type '(inout VideoBlog) -> ()' to expected argument type '(inout Blog) -> ()'
+```
+
+As we can see, functions are invariant with their arguments type, if those arguments are in-out. 
+
+*To understand follow explanation, you should be aware of [in-out parameters] (https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Functions.html#//apple_ref/doc/uid/TP40014097-CH10-ID158) notion.*
+
+Invariance of in-out arguments also makes sense. Passing argument of the type `(inout InetResource) -> ()` to the function `applyAdsMembershipForBlog(:)`, which axpects `(inout Blog)->()` type, isn't allowed, cause otherwise it will try to substitute `Blog` type wiht `InetResource` type on return of `itegrateAds(&blog)` execution. With passing in an argument of the type `(inout VideoBlog) -> ()`, wrong substitution of the type `VideoBlog` with type `Blog` on calling `itegrateAds(&blog)` takes place.
+
+Obviously, functions stay contravariant with ordinary arguments types, even if they also have in-out arguments:
+
+[](InvarianceContravarianceOfFunctionsArgumentsTypes.playground)
+
+```swift
+class Blog {}
+
+typealias AdType = String
+
+var blog = Blog()
+
+// Function with argument of type '(inout Blog)->()'
+func applyAdsMembershipForBlog(_ itegrateAds:(AdType, inout Blog)->()) {
+    itegrateAds("banners", &blog)
+}
+
+// Function of type '(AdType?, inout Blog)->()'
+func integrateAds(of type: AdType?, for possibleBlog: inout Blog) {}
+
+// Can substitute '(AdType, inout Blog)->()' type with '(AdType?, inout Blog)->()' type
+applyAdsMembershipForBlog(integrateAds)
+```
+
+So the real truth is that ***functions in Swift are invariant with their in-out arguments types, contravariant with their ordinary arguments types and covariant with their return type***. For analogy with our abstract syntax, the function of type `(inout P1, P2, P3) -> R` looks like `F[P1][P2, P3][R]` and is invariant with the first components group, contravariant with the second, and covariant with the third.
+
+And for sum-up reasons, why functions behave exactly in such way:
+
+* ***a return type of a 'replace function' will substitute a return type of a 'replaced function'***;
+* ***ordinary arguments types of a 'replace function' will be substituted with appropriate argument types of a 'replaced function'***;
+* ***in-out arguments types of a 'replace function' will be substituted and will substitute appropriate arguments types of a 'replaced function'***.
+
+*Here are: 'replace function' —  a function that substitutes another one; 'replaced function' —  a function that is substituted by another one.*
 
 **Variance of tuples in Swift**
 
