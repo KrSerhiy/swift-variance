@@ -12,7 +12,7 @@ To understand the explanation of variance, we need to be aware of the key concep
 
 #### Simple types
 
-Referring to [The Swift Programming Language](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Types.html#//apple_ref/doc/uid/TP40014097-CH31-ID445) book, we have next types in Swift ( the division on named and compound types doesn’t matter for us): ***classes, structures, enumerations, protocols***, functions and tuples. From this list, functions, and tuples, but not only, are complex types (we are going to see that a little bit later), and the rest are simple.
+Referring to [The Swift Programming Language](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Types.html#//apple_ref/doc/uid/TP40014097-CH31-ID445) book, we have next types in Swift ( the division on named and compound types doesn’t matter for us): ***classes, structures, enumerations, protocols***, functions, and tuples. From this list, functions, and tuples, but not only, are complex types (we are going to see that a little bit later), and the others are simple.
 
 #### Subtyping
 
@@ -63,9 +63,9 @@ subscribeOn(videoBlog)
 
 Similar, as with classes, protocol inheritance guarantee that a type which conforms to `VideoBlog` protocol, must also conform to the requirements of `Blog` protocol. That’s why it is safe to pass the instance of the type `VideoBlog` where the instance of the type `Blog` is expected.
 
-To summarize the above: ***from a point of variance, there are only two meaningful simple types in Swift: classes and protocols***.
+To summarize the above: ***from a point of variance, there are only two meaningful simple types, in Swift: classes and protocols***.
 
-Besides inheritance of the classes and  protocols, there is one more way to achieve subtyping: ***any type is a subtype of an appropriate optional type in Swift***. Here is the code example:
+Besides inheritance of the classes and protocols, there is one more way to achieve subtyping: ***any type is a subtype of an appropriate optional type in Swift***. Here is the code example:
 
 [](OptionalsSubtyping.playground)
 
@@ -80,17 +80,17 @@ let inetResource: InetResource = InetResource()
 share(inetResource)
 ```
 
-In the following examples, we are going to use all these subtyping mechanisms in relation with variance.
+In the following examples, we are going to use all these subtyping mechanisms, to demonstrate variance behavior of types in Swift.
 
 #### Complex types
 
-Complex types — types, which are constructed with another simple or complex types or which have another simple or complex types as its type components. Type components  are types which are used by a [type constructor](https://en.wikipedia.org/wiki/Type_constructor) to build a new complex type. There are such complex types in Swift: ***functions, tuples, generic structures/enumerations/classes***. Also, in Swift, we have such complex things like generic functions and protocols with Self or associated types requirements. But we can’t consider them as fully-fledged types, cause we can’t use them:
+Complex types — types, which are constructed with another simple or complex types or which have another simple or complex types as its type components. Type components are types which are used by a [type constructor](https://en.wikipedia.org/wiki/Type_constructor) to build a new complex type. There are such complex types in Swift: ***functions, tuples, generic structures/enumerations/classes***. Also, in Swift, we have such complex things as generic functions and protocols with Self or associated types requirements. But we can’t consider them as fully-fledged types, cause we can’t use them:
 
 > * [as a parameter type or return type in a function, method, or initializer](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Protocols.html#//apple_ref/doc/uid/TP40014097-CH25-ID267)
 > * [as the type of a constant, variable, or property](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Protocols.html#//apple_ref/doc/uid/TP40014097-CH25-ID267) 
 > * [as the type of items in an array, dictionary, or other container](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Protocols.html#//apple_ref/doc/uid/TP40014097-CH25-ID267)
 
-The exception is protocols, in which Self used only as return types of methods. Those protocols behave similarly as simple protocols:
+The exception is protocols, in which Self is used only as return types of methods. Those protocols behave similarly as simple protocols:
 
 [](SimpleProtocolWithSelfRequirement.playground)
 
@@ -145,14 +145,14 @@ func functionWithFunction(anotherFunc: (Int) -> Bool) {} // complex function typ
 
 #### Variance
 
-So, variance is about realizing what subtyping behavior a complex type has according to subtyping behavior of appropriate type components.
+So, the notion variance is about realizing what subtyping behavior a complex type has according to subtyping behavior of appropriate type components.
 
-Let’s assume that expression `A[B]` means, that the  type `A` is a complex type, constructed from the simple type `B`, or the complex type `A` has the simple type `B` as its type component.  According to this abstract syntax, let’s give the definitions of the different kinds of variance:
+Let’s assume that expression `A[B]` means, that the type `A` is a complex type, constructed from the simple type `B`, or the complex type `A` has the simple type `B` as its type component.  According to this abstract syntax, let’s give the definitions of the different kinds of variance:
 
 * the type `A` is ***covariant*** with its type components if the type `A[C]` is a subtype of the type `A[B]`, when `C` is a subtype of the  type `B`;
 * the type `A` is ***contravariant*** with its type components if the type `A[B]` is a subtype of the type `A[C]`, when `C` is a subtype of the type `B`;
-* the type `A` is ***invariant*** with its type components if the type `A[B]` is never subtype of the type `A[C]`, regardless of subtyping relations between the types `C` and `B`;
-* the type `A` is ***bivariant*** with its type components if the type `A[B]` is always subtype of the type `A[C]`, regardless of subtyping relations between the types `C` and `B`.
+* the type `A` is ***invariant*** with its type components if the type `A[B]` is never a subtype of the type `A[C]`, regardless of subtyping relations between the types `C` and `B`;
+* the type `A` is ***bivariant*** with its type components if the type `A[B]` is always a subtype of the type `A[C]`, regardless of subtyping relations between the types `C` and `B`.
 
 Complex types can have:
 
@@ -199,12 +199,10 @@ processBlog(getInetResource) // Cannot convert value of type '() -> InetResource
 
 We can make the assumption, that functions in Swift are covariant with their components, cause:
 
-* `VideoBlog` is a subtype of `Blog` and `() -> VideoBlog` is a subtype of `() ->
-Blog` (as derived from `processBlog(getVideoBlog)`)
-* `Blog` is a subtype of `InetResource`  and `() -> InetResource` isn’t a subtype
-of `() -> Blog` (as derived from `processBlog(getInetResource)`)
+* `VideoBlog` is a subtype of `Blog` and `() -> VideoBlog` is a subtype of `() -> Blog` (as derived from `processBlog(getVideoBlog)`)
+* `Blog` is a subtype of `InetResource`  and `() -> InetResource` isn’t a subtype of `() -> Blog` (as derived from `processBlog(getInetResource)`)
 
-But this is not completely truth. Let’s look on another example:
+But this is not completely true. Let’s look at another example:
 
 [](VarianceOfFunctionsArgumentsTypes.playground)
 
@@ -316,7 +314,7 @@ I don’t exactly know, why in the previous example we get different error messa
 
 **Variance of generics in Swift**
 
-Under generics, I mean generic enumerations, structures or classes. Let’s look at the code example, to realize variance of generics in swift (here we have the example with using a generic class, but with structures and enumerations behavior is the same):
+Under generics, I mean generic enumerations, structures or classes. Let’s look at the code example, to realize variance of generics in swift (in this example a generic class are used, but with structures and enumerations behavior is the same):
 
 [](CustomGenericsVariance.playground)
 
@@ -385,7 +383,7 @@ let inetResourcesSet: Set<InetResource> = []
 suscribeOnSetOf(inetResourcesSet) // Cannot convert value of type 'Set<InetResource>' to expected argument type 'Set<Blog>'
 ```
 
-Ass we can see, sets are covariant with their type parameters. Optionals, dictionaries and arrays have the same behavior:
+Ass we can see, sets are covariant with their type parameters. Optionals, dictionaries, and arrays have the same behavior:
 
 [](OptionalsDictionariesArraysCovariance.playground)
 
