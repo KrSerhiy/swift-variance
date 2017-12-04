@@ -39,7 +39,7 @@ subscribeOn(VideoBlog())
 subscribeOn(InetResource()) // Cannot convert value of type 'InetResource' to expected argument type 'Blog'
 ```
 ​
-Why does substitution of the type `Blog` with the type `VideoBlog` make sense? Via inheritance, `VideoBlog` type receives all properties and behavior, which `Blog` has. It gives us the guarantee, that anything `subscribeOn(:)` function can do with `blog` parameter of the type `Blog` is also going to work with the instance of `VideoBlog` type.
+Why does substitution of the type `Blog` with the type `VideoBlog` make sense? Via inheritance, `VideoBlog` type receives all properties and behavior, which `Blog` has. It gives us the guarantee, that anything `subscribeOn(_:)` function can do with `blog` parameter of the type `Blog` is also going to work with the instance of `VideoBlog` type.
 
 There is one more simple type, which allows to implement subtyping — a protocol. With protocols, we also can do that via inheritance:
 
@@ -297,7 +297,7 @@ As we can see, functions are invariant with their arguments type, if those argum
 
 *To understand follow explanation, you should be aware of [in-out parameters] (https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/Functions.html#//apple_ref/doc/uid/TP40014097-CH10-ID158) notion.*
 
-Invariance of in-out arguments also makes sense. Passing argument of the type `(inout InetResource) -> ()` to the function `applyAdsMembershipForBlog(:)`, which axpects `(inout Blog)->()` type, isn't allowed, cause otherwise it will try to substitute `Blog` type wiht `InetResource` type on return of `itegrateAds(&blog)` execution. With passing in an argument of the type `(inout VideoBlog) -> ()`, wrong substitution of the type `VideoBlog` with type `Blog` on calling `itegrateAds(&blog)` takes place.
+Invariance of in-out arguments also makes sense. Passing argument of the type `(inout InetResource) -> ()` to the function `applyAdsMembershipForBlog(_:)`, which axpects `(inout Blog)->()` type, isn't allowed, cause otherwise it will try to substitute `Blog` type wiht `InetResource` type on return of `itegrateAds(&blog)` execution. With passing in an argument of the type `(inout VideoBlog) -> ()`, wrong substitution of the type `VideoBlog` with type `Blog` on calling `itegrateAds(&blog)` takes place.
 
 Obviously, functions stay contravariant with ordinary arguments types, even if they also have in-out arguments:
 
